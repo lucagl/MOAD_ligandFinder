@@ -739,7 +739,11 @@ def main(argv):
 
         print("Number of structures to process= ",len(nameList))
         print("number of chuncks= ",nc)
-        input("proceed?\n")
+        answ = input("proceed? (y/n)\n")
+        if (answ=='y'):
+            ContinueI
+        else:
+            sys.exit()
     else:
         ligMapFiles.append(open("ligandMap.txt",'w'))
         ligMapFiles[0].write("# ************** PDB ligand Map *************** \n")
