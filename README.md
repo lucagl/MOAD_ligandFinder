@@ -34,7 +34,7 @@ The naming scheme is un-ambiguous and inspired from the MOAD database. CAREFUL: 
 a number will be appended to the created ligand (pdb or coordinate) file.
 
 ### "Database" Mode
-`python3 lfetch -d`
+`python3.py lfetch -d`
 
 Will automatically produce a ligandMap file (1 line per structure followed by its ligands) and extract all valid ligands in separate files.
 The ligands will be placed in an "output" folder created by the script.
