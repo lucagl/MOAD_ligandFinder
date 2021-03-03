@@ -9,7 +9,7 @@ a number will be appended to the created ligand (pdb or xyz) file (see also belo
 
 ## Requirements:
 
-### Few non-builtin libraries (recommended pip install method):
+### Few non-builtin libraries:
 * Numpy
 * Requests
 
