@@ -20,7 +20,7 @@ I do not take any credit on the very nice pdb2pqr software
 
 ## Usage:
 ### "Manual" Mode
-`python3 lfetch`
+`python3 lfetch.py`
 will ask to the user to insert the name of the PDB structure. 
 If the pdb is not found in the working directory, it will be automatically downloaded.
 The user can keep inserting other queries, the behavior will be identical and new info appended in the ligandMap file (see below).
@@ -50,35 +50,35 @@ The ligands will be placed in an "output" folder created by the script.
 
 ### Example of usage and ligandMap file produced:
 
-* `python3 lfetch
+* `python3 lfetch.py`
 
-`Insert pdb name
+`Insert pdb name`
 
-6gj6
+`6gj6`
 
-^C 
+`^C `
 
-TOTAL NUMBER OF STRUCTURES SUCCESFULLY PROCESSED = 1`
+`TOTAL NUMBER OF STRUCTURES SUCCESFULLY PROCESSED = 1`
 
 Content of ligandMap.txt:
 
-`\# ************** PDB ligand Map ***************
+`\# ************** PDB ligand Map ***************`
 
-\#       Created using '*BuildMap module*
+`\#       Created using '*BuildMap module*`
 
-\# Ligand validation based on binding MOAD database.
+`\# Ligand validation based on binding MOAD database.`
 
-\# Author L. Gagliardi, Istituto Italiano di Tecnologia
+`\# Author L. Gagliardi, Istituto Italiano di Tecnologia`
 
-\# LOCAL TIME = 2021-03-03 17:38:18
+`\# LOCAL TIME = ---`
 
-\# --------------
+`\# --------------`
 
-2       6gj6
+`2       6gj6`
 
-EZZ_A:204
+`EZZ_A:204`
 
-GCP_A:203`
+`GCP_A:203`
 
 
                                                                                                                      ~                                                                                                                       ~               
