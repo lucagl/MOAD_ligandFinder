@@ -43,7 +43,7 @@ The ligands will be placed in an "output" folder created by the script.
 
 * `--PQR` : A pqr file purged of all *found* ligands and *HETATM* will be produced using pdb2pqr with AMBER force field (if needed this behavior can be extended to any force field)
 * `--XYZ`: The ligands are saved in coordinates files (.xyz) containing only their coordinates.
-* `-c`: "Chunk mode" working only if `-d` option is also activated. The ligand (and pqr, if the above option is set) files with their correspondend ligandMap are distributed in separate folders each one including the number of structures indicated by the user. The folder are simply indicated with numbers. This option is thought to create a database and split it for parallel use in codes..
+* `-c`: "Chunk mode" working only if `-d` option is also activated. The ligand (and pqr, if the above option is set) files with their correspondend ligandMap are distributed in separate folders each one including the number of structures indicated by the user. The folder are simply indicated with numbers. This option is thought to create a database and split it for parallel use in codes.. This functionality is still very basic indeed if there are some skipping of structures, no rearrangement of the folder content is performed.
 * `--safe`: Partial matches with respect to what expected from the MOAD database are excluded. This means that this type of ligands are not extracted and their entry in the ligandMap.txt file is commented
 * `--quiet`: do *not* print info while running.
 * Advanced: `--excludeLarge` : large pqr files (more than 10000 lines) will be excluded. This means that the line concerning those structures in ligandMap is commented and their relative ligands are *not* extracted.
@@ -79,8 +79,8 @@ Content of ligandMap.txt:
 `EZZ_A:204`
 
 `GCP_A:203`
+                                    ~               
 
-
-                                                                                                                     ~                                                                                                                       ~               
-
-
+# ACKNOLEDGMENTS:
+This is a small accessory project in my work, but still I would very much appreciate an acknowledgment if this helped you save some time :). 
+Luca Gagliardi, MOAD ligandFinder, (2021) GitHub repository.
