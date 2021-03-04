@@ -1,5 +1,5 @@
 # MOAD Ligand Finder
-This script was originally conceived to build reliable databases of structure (in PDB format) and relative ligands extracted from the structure.
+This script was originally conceived to build reliable databases of structures (in PDB format) and relative ligands extracted from the structure.
 
 However, this tool could be handy in general. Indeed, is not always obvious how to identify the ligand within a pdb and the naming scheme can be cumbersome (combinations of Residue ID, Chain, Residue Name can represent a single ligand or not). I hope this script could help navigate through this. 
 Ligand names are fetched from the **binding MOAD database**: "http://bindingmoad.org/pdbrecords/index/"  . Only valid ligands (according to MOAD's criteria) are considered.
@@ -60,7 +60,7 @@ The ligands will be placed in an "output" folder created by the script.
 
 `TOTAL NUMBER OF STRUCTURES SUCCESFULLY PROCESSED = 1`
 
-Content of ligandMap.txt:
+Content of ligandMap.txt: name of the structure with a number in front indicating the number of valid ligands found (according to binding MOAD) followed by the names of the ligands (1 line per distint ligand). The name of the ligands appearing in ligandMap.txt is identical to the name of the file containing the ligand coordinates.
 
 `\# ************** PDB ligand Map ***************`
 
@@ -83,4 +83,4 @@ Content of ligandMap.txt:
 
 # ACKNOLEDGMENTS:
 This is a small accessory project in my work, but still I would very much appreciate an acknowledgment if this helped you save some time :). 
-Luca Gagliardi, MOAD ligandFinder, (2021) GitHub repository.
+*Luca Gagliardi, MOAD ligandFinder, (2021) GitHub repository*.
