@@ -1,5 +1,5 @@
 # MOAD Ligand Finder
-This script was originally conceived to build reliable databases of structures (in PQR format) and relative ligands extracted from structures in PDB format.
+This script was originally conceived to build reliable databases of structures (in PQR format) and relative ligands extracted from structures. The structures are given as an input in PDB format.
 
 However, this tool could be handy in general. Indeed, is not always obvious how to identify the ligand within a pdb and the naming scheme can be cumbersome (combinations of Residue ID, Chain, Residue Name can represent a single ligand or not). I hope this script could help navigate through this. 
 Ligand names are fetched from the **binding MOAD database**: "http://bindingmoad.org/pdbrecords/index/"  . Only valid ligands (according to MOAD's criteria) are considered.
