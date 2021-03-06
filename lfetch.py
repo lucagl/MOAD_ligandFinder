@@ -253,25 +253,19 @@ def queryMOAD(pdb_name):
                 for cr in matchChainRest:
                     #this will be used as filename containing ligand coordinates
                     #set() to remove duplicates
-                    # print(l.split())
+                   
                     name = repr(namelist).replace("[","").replace("]","").replace("'","")
-                    filename=name.replace(", ", "_")+'_'+cr 
-                    # print(filename)
-                    # chain,number = re.match("([A-Z]):([\d]+)",cr).groups()
+                
+                    filename=name.replace(", ", "_")+'_'+cr.replace(":","") 
+                    
                     chain,number = re.match("([\w0-9]):([\d]+)",cr).groups()
-                    # print(chain)
-                    # print(number)
+
                     resid = [str(i) for i in range(int(number),int(number)+len(namelist))]
-                    # print({'filename':filename,'name(s)':namelist ,'chain': chain,'resid(s)':resid})
+            
                     ligands.append({'filename':filename,'name(s)':namelist ,'chain': chain,'resid(s)':resid})
             
         s+=1   
-            # matchValidity = re.match()
-    #Now go trough the table to check validity and find ligand chain and resNumber 
-    #If same name but different chain and resnumber these are distint ligands
     
-    
-
 #<fieldset id="fieldset_ligandinfo" class="coolfieldset"> 
                     # <tbody>
                     #                             <tr>
