@@ -6,6 +6,8 @@ Ligand names are fetched from the **binding MOAD database**: "http://bindingmoad
 The naming scheme is un-ambiguous and inspired from the binding MOAD database. CAREFUL: if a (ligand) file with the same name exist, 
 a number will be appended to the created ligand (pdb or xyz) file (see also below).
 
+**NOTE**: The ligands extracted contain only HEAVY atoms (purged of hidrogens). Please, if this behavior is not always desiderable, write me a feedback to make it user-defined.
+
 
 ## Requirements:
 Python3 and:
