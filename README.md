@@ -53,9 +53,11 @@ The ligands will be placed in an "output" folder created by the script. If the `
 
 
 Please, do not hesitate to post issues, improvements suggestion or report bugs. I will try to answer them.
+### Recomendations
+Check the "error_log.txt" file after running. Will report the reasons for which a ligand or full structure was skipped and other useful info.
 ### Example of usage and ligandMap file produced:
 
-* `python3 lfetch.py`
+`python3 lfetch.py`
 
 `Insert pdb name`
 
@@ -65,7 +67,9 @@ Please, do not hesitate to post issues, improvements suggestion or report bugs. 
 
 `TOTAL NUMBER OF STRUCTURES SUCCESFULLY PROCESSED = 1`
 
-Content of ligandMap.txt: name of the structure with a number in front indicating the number of valid ligands found (according to binding MOAD) followed by the names of the ligands (1 line per distint ligand). The name of the ligands appearing in ligandMap.txt is identical to the name of the file containing the ligand coordinates.
+Content of ligandMap.txt: name of the structure with a number in front indicating the number of valid ligands found (according to binding MOAD) followed by the names of the ligands (one line per distint ligand). The name of the ligands appearing in ligandMap.txt is identical to the name of the file containing the ligand coordinates.
+Example of ligand.txt produced from the above call:
+
 
 `\# ************** PDB ligand Map ***************`
 
