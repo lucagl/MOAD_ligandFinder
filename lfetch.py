@@ -289,7 +289,7 @@ def queryMOAD(pdb_name):
 
 
 
-def extractLigand(pdbName,dictList,savepath,onlyXYZ,extractPQR):
+def extractLigand(pdbName,dictList,savepath,onlyXYZ,extractPQR,purgePDB):
     '''
     Given the map produced by queryMOAD() and the pdb file, creates xyz files of the heavy atoms of the ligand (*)
     Also produces a temp file containing the pdb without the ligand coordinates EXTRACTED neither HETATM.
@@ -302,6 +302,8 @@ def extractLigand(pdbName,dictList,savepath,onlyXYZ,extractPQR):
 
     *) Heavy atoms are kept recognizing Hydrogens in the ligand (example pdb_code: 1cka)
 
+    NOTE: in purged PDB extraction, if PQR conversion is performed, the line containing SEQADV is also removed
+    since this very rarely was creating problems in conversion.
     '''
 
 
@@ -319,7 +321,10 @@ def extractLigand(pdbName,dictList,savepath,onlyXYZ,extractPQR):
     comment =['#', 'REMARK','MASTER', 'END']
     info = ['SOURCE','COMPND','TITLE','HEADER','JRNL','AUTHOR','REVDAT','KEYWDS','EXPDTA']
     crist = ['CRYST1','ORIGX[0-9]','SCALE[0-9]','MTRIX[0-9]','TVECT']
-    primStruct = ['DBREF','SEQRES','MODRES','SITE']#'SEQADV' skipping, sometimes creates problem to keep this line in pd2prq..
+    if(extractPQR):
+        primStruct = ['DBREF','SEQRES','MODRES','SITE']#'SEQADV' skipping, sometimes creates problem to keep this line in pd2prq..
+    else:
+        primStruct = ['DBREF','SEQRES','MODRES','SITE','SEQADV']
     connectivity = ['CONECT','SSBOND','LINK','HYDBND','SLTBRG','CISPEP']
     secStruct = ['HELIX','SHEET','TURN']
     protein = ['ATOM','MODEL','SIGATM','ANISOU','SIGUIJ','TER','ENDMDL']
@@ -402,8 +407,13 @@ def extractLigand(pdbName,dictList,savepath,onlyXYZ,extractPQR):
             matches.append(m)
         ##########
         #######
-        if(extractPQR):
-            tmpFile=open('tmp','w') # contains original files without FOUND ligand and hetatm
+        make_purgedPDB=False
+        if(extractPQR or purgePDB):
+            make_purgedPDB=True 
+            if(purgePDB):
+                tmpFile = open(pdbName+'_clean.pdb','w') # contains original files without FOUND ligand and hetatm
+            else:
+                tmpFile=open('tmp','w')
         # print(matches)
         ligandAtoms = 0
         # print(matches)
@@ -437,13 +447,13 @@ def extractLigand(pdbName,dictList,savepath,onlyXYZ,extractPQR):
             if not HEAVY: 
                     #skipping also the line for the tmp file
                     continue
-            if (not ligandMatched and extractPQR):
+            if (not ligandMatched and make_purgedPDB):
                 #write wathever is not ligand nor HETATM
                 if(re.match(keep,line)):
                     # print(line)
                     tmpFile.write(line) #write all lines starting with "keep" to tmp file
                     continue
-        if(extractPQR):
+        if(make_purgedPDB):
             tmpFile.close()
         for f in fo:
             f.close() 
@@ -497,7 +507,16 @@ def extractLigand(pdbName,dictList,savepath,onlyXYZ,extractPQR):
 #####################
 
 
-def removeLine(linesToskip):
+def removeLine(linesToskip,inName):
+    '''
+    Remove problematic line from pdb for pqr conversion.
+    This info is gathered from the error message of pdb2pqr.
+
+    TODO: In the case where the purged pdb file is not removed, since its output is user required,
+    the final file while have those lines removed. This is not very clean and not transparent for user.
+    In case a tmp file is produced for the only purpose of pqr creation, this is perfectly OK,
+    the file is removed from the script at the end.
+    '''
     continueI = ContinueI()
     matchingLines = []
     info = []
@@ -511,10 +530,10 @@ def removeLine(linesToskip):
             resid = m.groups()[2]
             info.append({'resname':resname,'chain':chain,'resid':resid})
             matchingLines.append("ATOM\s*[\d]+\s*[\S]+\s+"+resname+"\s+"+chain+"\s*"+resid+"\s+(\-?\d*\.?\d+)\s*(\-?\d*\.?\d+)\s*(\-?\d*\.?\d+)")
-    oldFile = open('tmp','r')
+    oldFile = open(inName,'r')
     oldData = oldFile.readlines()
     oldFile.close()
-    newFile = open('tmp','w')
+    newFile = open(inName,'w')
     for line in oldData:
         try:
             for ml in matchingLines:
@@ -542,15 +561,15 @@ def chunks(lst, n):
 
 
 
-def buildPQR(n,isEX,savepath = '.',move=False,skipLarge = False):
+def buildPQR(n,isEX,inName,savepath = '.',move=False,skipLarge = False):
     err = Error()
     comment = ""
     outname = n+'.pqr'
     savepath = savepath +'/'
     if(isEX):
-            pdb2pqrCall = 'pdb2pqr --drop-water --ff=amber --chain tmp '+outname
+            pdb2pqrCall = 'pdb2pqr --drop-water --ff=amber --chain '+inName+' '+outname
     else:
-        pdb2pqrCall = "pdb2pqr30 --drop-water --keep-chain --ff=AMBER tmp " +outname
+        pdb2pqrCall = "pdb2pqr30 --drop-water --keep-chain --ff=AMBER "+inName+' ' +outname
     # print(pdb2pqrCall)
     tryingToFix = True
     if(isEX):
@@ -562,7 +581,7 @@ def buildPQR(n,isEX,savepath = '.',move=False,skipLarge = False):
             # print ("error code", grepexc.returncode, grepexc.output)
                 errlines=str(grepexc.output).split('\\n')
                 # print(errlines)
-                nHeavyAtomMissing,rmvdAtoms = removeLine(errlines)
+                nHeavyAtomMissing,rmvdAtoms = removeLine(errlines,inName)
             # print(nHeavyAtomMissing)
                 if(nHeavyAtomMissing>0):
                     tryingToFix = True
@@ -592,7 +611,7 @@ def buildPQR(n,isEX,savepath = '.',move=False,skipLarge = False):
                 # print(out)
                 if(re.search("(CRITICAL)",out)):
                     checkout=out.split('\\n')
-                    nHeavyAtomMissing,rmvdAtoms = removeLine(checkout)
+                    nHeavyAtomMissing,rmvdAtoms = removeLine(checkout,inName)
                     # print(nHeavyAtomMissing)
                     # print(rmvdAtoms)
                     if(nHeavyAtomMissing>0):
@@ -643,7 +662,7 @@ def main(argv):
     excludeLage = False
     isDatabase =False
     isChunk = False
-
+    purgePDB = False
     extractPQR = False
     noTollerance =False
     verbose = True
@@ -653,7 +672,7 @@ def main(argv):
 
     ###
     try:
-        opts, args = getopt.getopt(argv,"dc",["XYZ","excludeLarge","PQR","safe","quiet"])
+        opts, args = getopt.getopt(argv,"dc",["XYZ","excludeLarge","PQR","purgePDB","safe","quiet"])
     except getopt.GetoptError:
         print ('uncorrect formatting of options')
         sys.exit(2)
@@ -675,6 +694,8 @@ def main(argv):
             extension = '.xyz'
         if opt in ["--PQR"]:
             extractPQR = True
+        if opt in ["--purgePDB"]:
+            purgePDB = True
         if opt in ["--safe"]:
             noTollerance = True
         if opt in ["--quiet"]:
@@ -713,7 +734,9 @@ def main(argv):
     if(isDatabase):
         # DATABASE BUILDING MODE 
         buildDatabase =True
-        infileList=glob.glob('*.pdb')
+
+        #exclude files containing _ which are ligands or purged pdb
+        infileList=[n for n in glob.glob('*.pdb') if "_" not in n]
     
         if not infileList:
             try:
@@ -834,7 +857,7 @@ def main(argv):
                     # print(ligandList)
                 stop = 0
                 while(stop<=1):
-                    err,matched = extractLigand(n,ligandList,savepath=local_path[s],onlyXYZ=onlyXYZ,extractPQR=extractPQR)
+                    err,matched = extractLigand(n,ligandList,savepath=local_path[s],onlyXYZ=onlyXYZ,extractPQR=extractPQR,purgePDB=purgePDB)
                     err.handle(errFile)
                     if err.value == 2:
                         if stop==0:
@@ -873,7 +896,11 @@ def main(argv):
                     continue
                 if (extractPQR):
                     #build pqr
-                    err,comment2 = buildPQR(n,isEX,savepath = local_path[s],move=moveFile,skipLarge=excludeLage)
+                    if(purgePDB):
+                        inName = n+'_clean.pdb'
+                    else:
+                        inName = 'tmp'
+                    err,comment2 = buildPQR(n,isEX,inName,savepath = local_path[s],move=moveFile,skipLarge=excludeLage)
                     err.handle(errFile)
                 else:
                     err.put_value(0)
@@ -936,7 +963,8 @@ def main(argv):
     errFile.close()
 
     if(extractPQR and data):
-        subprocess.run(['rm', 'tmp'])
+        if(not purgePDB):
+            subprocess.run(['rm', 'tmp'])
     
     if(extractPQR):
         if(not isEX):
