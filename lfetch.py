@@ -445,8 +445,9 @@ def extractLigand(pdbName,dictList,savepath,onlyXYZ,extractPQR,purgePDB):
                         ligandMatched = True
                         break 
             if not HEAVY: 
-                    #skipping also the line for the tmp file
-                    continue
+                #Here only if ligand line is matched
+                #skipping also the line for the tmp file-->Avoid spurious light ligand atom in purged pdb..
+                continue
             if (not ligandMatched and make_purgedPDB):
                 #write wathever is not ligand nor HETATM
                 if(re.match(keep,line)):
