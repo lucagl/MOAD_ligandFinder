@@ -40,7 +40,7 @@ Will automatically produce a ligandMap file (1 line per structure followed by it
 The ligands will be placed in an "output" folder created by the script.
 
 ### Other options
-
+* **NEW** `--purgePDB` : A new pdb named: <original name>_clean.pdb is created and contains the original structure purged of any HETATM and *extracted* ligand (non extracted ones which are *not* HEDATM, due to failed matching scheme -- note: the  `--safe` option will increase those scenarios-- will be present in the purged file)
 * `--PQR` : A pqr file purged of all *found* ligands and *HETATM* will be produced using pdb2pqr with AMBER force field (if needed it could be extended to any force field, please post an issue and I will modify the code)
 * `--XYZ`: The ligands are saved in coordinates files (.xyz) containing only their coordinates.
 * `-c`: "Chunk mode" working only if `-d` option is also activated. The ligand (and pqr, if the above option is set) files with their correspondend ligandMap are distributed in separate folders each one including the number of structures indicated by the user. The folder are simply indicated with numbers. This option was conceived to create a database split in different chunks for parallel use in codes.. This functionality is still very basic: if there are some skipping of structures, no rearrangement of the folder content is performed.
