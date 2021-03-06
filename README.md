@@ -3,7 +3,8 @@ This script was originally conceived to build reliable databases of structures (
 
 However, this tool could be handy in general. Indeed, is not always obvious how to identify the ligand within a pdb and the naming scheme can be cumbersome (combinations of Residue ID, Chain, Residue Name can represent a single ligand or not). I hope this script could help navigate through this. 
 Ligand names are fetched from the **binding MOAD database**: "http://bindingmoad.org/pdbrecords/index/"  . Only valid ligands (according to MOAD's criteria) are considered.
-The naming scheme is un-ambiguous and inspired from the binding MOAD database. CAREFUL: if a (ligand) file with the same name exist, 
+The naming scheme is un-ambiguous and inspired from the binding MOAD database. 
+**CAREFUL**: if a (ligand) file with the same name exist, 
 a number will be appended to the created ligand (pdb or xyz) file (see also below).
 
 **NOTE**: The ligands extracted contain only HEAVY atoms (purged of hidrogens). Please, if this behavior is not always desiderable, write me a feedback to make it user-defined.
