@@ -8,13 +8,13 @@ a number will be appended to the created ligand (pdb or xyz) file (see also belo
 
 
 ## Requirements:
-
+Python3 and:
 ### Few non-builtin libraries:
 * Numpy
 * Requests
 
-### Pdb2Pqr:
-Only if the option `--PQR` is activated.
+**Only if the option `--PQR` is activated:**
+### Pdb2Pqr installed:
 This software can be found here: https://github.com/Electrostatics/pdb2pqr 
 I do not take any credit on the very nice pdb2pqr software
 
