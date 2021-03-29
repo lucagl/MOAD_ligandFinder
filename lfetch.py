@@ -836,7 +836,7 @@ def main(argv):
             for n in names:
                 comment1=""
                 comment2=""
-                if n in done:
+                if n.lower() in done:
                     continue
                 global_counter+=1
                 
@@ -937,7 +937,7 @@ def main(argv):
                 
                 errFile.flush()
                 ligMapFiles[s].flush()
-                done.add(n)
+                done.add(n.lower())
                 if verbose:
                     if(isDatabase):
                         print("processed: " +n)
