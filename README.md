@@ -1,10 +1,10 @@
 # MOAD Ligand Finder
-This script was originally conceived to build reliable databases of structures (in PQR format) and relative ligands extracted from structures in PDB format.
+This script was originally conceived to build reliable databases of structures (in PQR format) and relative ligands extracted from structures. The structures are given as an input in PDB format.
 
 However, this tool could be handy in general. Indeed, is not always obvious how to identify the ligand within a pdb and the naming scheme can be cumbersome (combinations of Residue ID, Chain, Residue Name can represent a single ligand or not). I hope this script could help navigate through this. 
 Ligand names are fetched from the **binding MOAD database**: "http://bindingmoad.org/pdbrecords/index/"  . Only valid ligands (according to MOAD's criteria) are considered.
 The naming scheme is un-ambiguous and inspired from the binding MOAD database. 
-*Note*: if a (ligand) file with the same name exist in the working directory, 
+*Note*: if a (ligand) file with the same name exists in the working directory, 
 a number will be appended to the created ligand (pdb or xyz) file (see also below).
 
 **NOTE**: The ligands extracted contain only HEAVY atoms (purged of hidrogens). Please, if this behavior is not always desiderable, write me a feedback to make it user-defined.
@@ -38,7 +38,7 @@ a number will be appended to the created ligand (pdb or coordinate) file.
 
 ### "Database" Mode
 `python3.py lfetch -d`
-Will look for all pdb files in the working directory (*not conaining _*) and 
+Will look for all pdb files in the working directory (*not containing "_"*) and 
 automatically produce a ligandMap.txt file for them (1 line per structure followed by its ligands) and extract all valid ligands in separate files.
 The ligands will be placed in an "output" folder created by the script. If the `--PQR` option is present, also the pqr files will be placed in the "output" folder.
 
@@ -54,7 +54,8 @@ The ligands will be placed in an "output" folder created by the script. If the `
 
 Please, do not hesitate to post issues, improvements suggestion or report bugs. I will try to answer them.
 ### Recomendations
-Check the "error_log.txt" file after running. Will report the reasons for which a ligand or full structure was skipped and other useful info.
+Check the "error_log.txt" file after running. Will report the reasons for which a ligand or a full structure was skipped and other useful info.
+
 ### Example of usage and ligandMap file produced:
 
 `python3 lfetch.py`
