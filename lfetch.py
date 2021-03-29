@@ -775,7 +775,6 @@ def main(argv):
 #############  ******* CORE FUNCTIONS ******* #############################
     done = set()
 
-
     loopinf=True
     data = [None]
     local_path =[None]
@@ -836,7 +835,7 @@ def main(argv):
             for n in names:
                 comment1=""
                 comment2=""
-                if n in done:
+                if n.lower() in done:
                     continue
                 global_counter+=1
                 
@@ -861,12 +860,17 @@ def main(argv):
                             err.info="Trying to re-download structure.."
                             err.handle(errFile)
                             url = "https://files.rcsb.org/download/"+n+".pdb"
-                            print(str(["wget", url,'-O',n+".pdb"]))
-                            proc = subprocess.Popen(["wget", url,'-O',n+".pdb"],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                            proc.wait()
-                            (stdout, stderr) = proc.communicate()
-                            if proc.returncode != 0:
-                                print(stderr)
+                            print(url)
+                            # print(str(["wget", url,'-O',n+".pdb"]))
+                            # proc = subprocess.Popen(["wget", url,'-O',n+".pdb"],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                            # proc.wait()
+                            # (stdout, stderr) = proc.communicate()
+                            try: 
+                                r = requests.get(url, allow_redirects=True)
+                                open(n+".pdb",'wb').write(r.content)
+                            except HTTPError:
+                            # if proc.returncode != 0:
+                                # print(stderr)
                                 print("Could not download "+n)
                                 err.handle(errFile)
                                 err.info = "Could not (re)download "+n
@@ -937,7 +941,7 @@ def main(argv):
                 
                 errFile.flush()
                 ligMapFiles[s].flush()
-                done.add(n)
+                done.add(n.lower())
                 if verbose:
                     if(isDatabase):
                         print("processed: " +n)
