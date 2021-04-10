@@ -869,6 +869,7 @@ def main(argv):
                             stop+=1
                             print("<ERROR>: Could not extract ligands for "+n+", trying to re-download structure..")
                             err.info="Trying to re-download structure.."
+                            err.value=1
                             err.handle(errFile)
                             url = "https://files.rcsb.org/download/"+n+".pdb"
                             print(url)
@@ -883,6 +884,7 @@ def main(argv):
                             # if proc.returncode != 0:
                                 # print(stderr)
                                 print("Could not download "+n)
+                                err.value =2
                                 err.handle(errFile)
                                 err.info = "Could not (re)download "+n
                                 err.handle(errFile)
