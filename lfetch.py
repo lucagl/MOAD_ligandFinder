@@ -919,7 +919,7 @@ def main(argv):
                 comment = comment1+comment2
                 # Updating ligMap
                 if(err.value==3):
-                    if(verbose):
+                    if(verbose and (not isDatabase)):
                         print("SKIPPING "+n+" since too large \n")
                     ligMapFiles[s].write('\n# '+str(len(ligandList)) +"\t" + n + "\t <-- Too large! IGNORING")
                     for l in ligandList:
@@ -957,8 +957,8 @@ def main(argv):
                 done.add(n.lower())
                 if verbose:
                     if(isDatabase):
-                        print("processed: " +n)
-                        print("%d / %d of structures processed" % (global_counter,total))
+                        # print("processed: " +n)
+                        print("\r%d / %d of structures processed" % (global_counter,total),end='')
                     else:
                         print("Valid ligands found: ",len(ligandList))
                         if(noTollerance):
