@@ -672,7 +672,7 @@ def main(argv):
         print ('uncorrect formatting of options')
         sys.exit(2)
     for opt, arg in opts:
-        if opt in["h","--help"]:
+        if opt in["-h","--help"]:
             print("Usage:\npython3 lfetch\nOptions:")
             print("--XYZ: ligands extracted as coordinate files")
             print("--PQR: pdb structures queried are converted to PQR. CAREFUL: needspdb2pqr intalled")
