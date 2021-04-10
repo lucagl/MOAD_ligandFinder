@@ -672,7 +672,7 @@ def main(argv):
         print ('uncorrect formatting of options')
         sys.exit(2)
     for opt, arg in opts:
-        if opt in["h,--help"]:
+        if opt in["h","--help"]:
             print("Usage:\npython3 lfetch\nOptions:")
             print("--XYZ: ligands extracted as coordinate files")
             print("--PQR: pdb structures queried are converted to PQR. CAREFUL: needspdb2pqr intalled")
@@ -681,6 +681,8 @@ def main(argv):
             print("--quiet: No info is printed on stdout while running")
             print("-d: \'Database mode\'--> all pdbs in the working folder are analysed")
             print("-c: User can split the result (e.g. extracted ligands) in separate folders defining the size of each chunk")
+            input('\n')
+            sys.exit()
         if opt in ["--excludeLarge"]:
             excludeLage = True 
         if opt in ["-d"]:
