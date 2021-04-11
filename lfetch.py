@@ -165,27 +165,38 @@ class Error(object):
 
 ########## Query function for MOAD #########
 #/pdbrecords/exclusion/4/1hel
-def queryMOAD(pdb_name):
+def queryMOAD(pdb_name,patience):
     """
     Given a pdb name, returns the number of valid ligands with a map than can be used (from extractLigand())
     to extract the ligand coordinates from the pdb file, distinguishing between separate ligands.
     To do so the functions fetch data from the MOAD database.
     """
     err = Error()
-    try:    
-        response = requests.get(URL+pdb_name,allow_redirects=True)
-        # print(response.url)
-        response.raise_for_status()
-    except HTTPError:
-        print("HTTP error occurred: No match in the MOAD database for "+pdb_name)
-        err.value = 2
-        err.info = "HTTP error occurred. No match in the MOAD database for "+pdb_name
-        return err,[]
-    except Exception:
-        print('Other error occurred for '+pdb_name+' (probably internet connection issues..)')  
-        err.value = 2
-        err.info = "Other error occurred for "+pdb_name+" (probably internet connection issues..)"
-        return err,[]
+    i=0
+    while(1):
+        try:
+            response = requests.get(URL+pdb_name,allow_redirects=True)
+            # print(response.url)
+            response.raise_for_status()
+            break
+        except HTTPError:
+            if(i>3 or (not patience)):#try 3 times this
+                print("HTTP error occurred: No match in the MOAD database for "+pdb_name)
+                err.value = 2
+                err.info = "HTTP error occurred. No match in the MOAD database for "+pdb_name
+                return err,[]
+            print("\r\t\tHTTP error: Attempt  " +str(i), end='')
+        except Exception:
+            if(i>=300 or (not patience)):# 5 mins of attempts
+                print('Other error occurred for '+pdb_name+' (probably internet connection issues..)')  
+                err.value = 2
+                err.info = "Other error occurred for "+pdb_name+" (probably internet connection issues..)"
+                return err,[]
+            print("\r\t\tConnection error: Attempt  " +str(i), end='')
+        sleep(1)
+        i+=1
+
+        
 
     #OBS also from response url I could deduce no match..
     raw = response.text
@@ -785,7 +796,7 @@ def main(argv):
 
 #############  ******* CORE FUNCTIONS ******* #############################
     done = set()
-
+    patience=False
     loopinf=True
     data = [None]
     local_path =[None]
@@ -804,6 +815,7 @@ def main(argv):
             except :
                 exit("a not handled exception occurred..")
         else:
+            patience=True
             loopinf =False
             moveFile = True
             data = [l for l in c_infile]
@@ -851,7 +863,7 @@ def main(argv):
                 global_counter+=1
                 
                 # print('\n**'+n)
-                err,ligandList = queryMOAD(n)
+                err,ligandList = queryMOAD(n,patience)
                 # print(ligandList)
                 err.handle(errFile)
                 if(err.value==2):
