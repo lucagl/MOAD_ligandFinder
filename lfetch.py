@@ -632,12 +632,12 @@ def buildPQR(n,isEX,inName,savepath = '.',move=False,skipLarge = False):
                         # err.info += "Unhandled exception on "+n+ "\n ORIGINAL ERROR MESSAGE FROM pdb2pqr:\n"+str(grepexc.output)+"\n-----------"
                     else:
                         err.put_value(2)
-                        err.info+= "\nCannot correct file"+n+"Unexpected exception.\n" +str(grepexc.output)+ "\nSkipping "   
+                        err.info+= "\nCannot correct file"+n+"Unexpected exception.\n Skipping "   
                         return err,comment
             except Exception:
                 print("IMPORTANT WARNING: Unexpected exception. Skipping")
                 err.put_value(2)
-                err.info = "Unexpected exception on "+n+ "\n ORIGINAL ERROR MESSAGE FROM pdb2pqr:\n"+str(grepexc.output)+"\n-----------"
+                err.info = "Unexpected exception on "+n+ "\n ORIGINAL ERROR MESSAGE FROM pdb2pqr:\n"+str(subprocess.CalledProcessError)+"\n-----------"
                 return err,comment
     if(skipLarge):
         lenght = file_len(outname)
