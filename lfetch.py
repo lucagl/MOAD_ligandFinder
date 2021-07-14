@@ -313,6 +313,7 @@ def extractLigand(pdbName,dictList,savepath,onlyXYZ,extractPQR,purgePDB):
 
 
     import copy 
+    
     key_dictionary =[]
     for li in dictList:
         # print(li)
@@ -341,13 +342,20 @@ def extractLigand(pdbName,dictList,savepath,onlyXYZ,extractPQR,purgePDB):
     # skip = proteinExtract
     keep = '(?:^% s)' % '|^'.join(keep) #match beginning
  
-    
+     
     try:
         pdb_file = open(pdbName+'.pdb','r')
     except Exception :
         err.info = "Did not find pdb file for "+pdbName
         err.put_value(2)
         return err,matchPerLigand
+
+    if(os.stat(pdbName+'.pdb').st_size == 0):
+        err.info = "Empty file for  "+pdbName
+        err.put_value(2)
+        return err,matchPerLigand
+
+        
     pdb_data = pdb_file.readlines()
     
     savepath = savepath +'/'
@@ -623,7 +631,7 @@ def buildPQR(n,isEX,inName,savepath = '.',move=False,skipLarge = False):
                     if(nHeavyAtomMissing>0):
                         # try:
                         err.put_value(1)
-                        err.info+="** Removed problematic heavy atom:"+str(rmvdAtoms)+"** "
+                        err.info+="** Removed problematic heavy atom from "+n+": "+str(rmvdAtoms)+"** "
                         comment = "\t  # --> a warning was produced in pdb2pqr conversion."
                         tryingToFix = True
                             # out=subprocess.check_output(pdb2pqrCall,shell=True,stderr=subprocess.STDOUT)
