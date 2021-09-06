@@ -62,6 +62,11 @@ Luca Gagliardi, MOAD_ligandFinder, (2021) GitHub repository.
 
 """
 
+
+amino = {'ALA','ARG','ASN','ASP','CYS','GLN','GLU','GLY','HIS','HID','HIE','HIP','ILE','LEU','LYS','MET','PHE','PRO','SER','THR','TRP','TYR','VAL'}
+#Alternative nomenclature for HIS: HID, HIE, HIP
+
+
 #### USEFUL FUNCTIONS
 def file_len(fname):
     with open(fname) as f:
@@ -165,27 +170,39 @@ class Error(object):
 
 ########## Query function for MOAD #########
 #/pdbrecords/exclusion/4/1hel
-def queryMOAD(pdb_name):
+def queryMOAD(pdb_name,patience):
     """
     Given a pdb name, returns the number of valid ligands with a map than can be used (from extractLigand())
     to extract the ligand coordinates from the pdb file, distinguishing between separate ligands.
     To do so the functions fetch data from the MOAD database.
     """
     err = Error()
-    try:    
-        response = requests.get(URL+pdb_name,allow_redirects=True)
-        # print(response.url)
-        response.raise_for_status()
-    except HTTPError:
-        print("HTTP error occurred: No match in the MOAD database for "+pdb_name)
-        err.value = 2
-        err.info = "HTTP error occurred. No match in the MOAD database for "+pdb_name
-        return err,[]
-    except Exception:
-        print('Other error occurred for '+pdb_name+' (probably internet connection issues..)')  
-        err.value = 2
-        err.info = "Other error occurred for "+pdb_name+" (probably internet connection issues..)"
-        return err,[]
+    
+    i=0
+    while(1):
+        try:
+            response = requests.get(URL+pdb_name,allow_redirects=True)
+            # print(response.url)
+            response.raise_for_status()
+            break
+        except HTTPError:
+            if(i>3 or (not patience)):#try 3 times this
+                print("HTTP error occurred: No match in the MOAD database for "+pdb_name)
+                err.value = 2
+                err.info = "HTTP error occurred. No match in the MOAD database for "+pdb_name
+                return err,[]
+            print("\r\t\tHTTP error: Attempt  " +str(i), end='')
+        except Exception:
+            if(i>=300 or (not patience)):# 5 mins of attempts
+                print('Other error occurred for '+pdb_name+' (probably internet connection issues..)')  
+                err.value = 2
+                err.info = "Other error occurred for "+pdb_name+" (probably internet connection issues..)"
+                return err,[]
+            print("\r\t\tConnection error: Attempt  " +str(i), end='')
+        sleep(1)
+        i+=1
+
+        
 
     #OBS also from response url I could deduce no match..
     raw = response.text
@@ -207,6 +224,7 @@ def queryMOAD(pdb_name):
         if matchLig:
             # print(matchLig.group(2))
             ligNames.add((matchLig.group(3)))
+            # print(ligNames)
             # got_name = match.group(2)
             # print(got_name)
             # if(got_name == pdb_name):
@@ -262,7 +280,13 @@ def queryMOAD(pdb_name):
 
                     resid = [str(i) for i in range(int(number),int(number)+len(namelist))]
             
-                    ligands.append({'filename':filename,'name(s)':namelist ,'chain': chain,'resid(s)':resid})
+                    # print(namelist)
+                    if(bool(set(namelist) & amino)):
+                        isPeptide = True
+                    else:
+                        isPeptide = False
+                    
+                    ligands.append({'filename':filename,'name(s)':namelist ,'chain': chain,'resid(s)':resid, 'isPeptide': isPeptide})
             
         s+=1   
     
@@ -302,6 +326,7 @@ def extractLigand(pdbName,dictList,savepath,onlyXYZ,extractPQR,purgePDB):
 
 
     import copy 
+    
     key_dictionary =[]
     for li in dictList:
         # print(li)
@@ -330,13 +355,20 @@ def extractLigand(pdbName,dictList,savepath,onlyXYZ,extractPQR,purgePDB):
     # skip = proteinExtract
     keep = '(?:^% s)' % '|^'.join(keep) #match beginning
  
-    
+     
     try:
         pdb_file = open(pdbName+'.pdb','r')
     except Exception :
         err.info = "Did not find pdb file for "+pdbName
         err.put_value(2)
         return err,matchPerLigand
+
+    if(os.stat(pdbName+'.pdb').st_size == 0):
+        err.info = "Empty file for  "+pdbName
+        err.put_value(2)
+        return err,matchPerLigand
+
+        
     pdb_data = pdb_file.readlines()
     
     savepath = savepath +'/'
@@ -424,7 +456,7 @@ def extractLigand(pdbName,dictList,savepath,onlyXYZ,extractPQR,purgePDB):
                     if match:
                         matchPerResName[s][k] = 1
                         # print (match.groups())
-                        if match.groups()[-1] == 'H':
+                        if ((match.groups()[-1] == 'H')or (match.groups()[-1] == 'D')):
                             HEAVY = False
                             break
                         ligandAtoms+=1
@@ -443,7 +475,7 @@ def extractLigand(pdbName,dictList,savepath,onlyXYZ,extractPQR,purgePDB):
                 #skipping also the line for the tmp file-->Avoid spurious light ligand atom in purged pdb..
                 continue
             if (not ligandMatched and make_purgedPDB):
-                #write wathever is not ligand nor HETATM
+                #write wathever is not ligand nor HETATM nor not heavy
                 if(re.match(keep,line)):
                     # print(line)
                     tmpFile.write(line) #write all lines starting with "keep" to tmp file
@@ -612,7 +644,7 @@ def buildPQR(n,isEX,inName,savepath = '.',move=False,skipLarge = False):
                     if(nHeavyAtomMissing>0):
                         # try:
                         err.put_value(1)
-                        err.info+="** Removed problematic heavy atom:"+str(rmvdAtoms)+"** "
+                        err.info+="** Removed problematic heavy atom from "+n+": "+str(rmvdAtoms)+"** "
                         comment = "\t  # --> a warning was produced in pdb2pqr conversion."
                         tryingToFix = True
                             # out=subprocess.check_output(pdb2pqrCall,shell=True,stderr=subprocess.STDOUT)
@@ -621,12 +653,12 @@ def buildPQR(n,isEX,inName,savepath = '.',move=False,skipLarge = False):
                         # err.info += "Unhandled exception on "+n+ "\n ORIGINAL ERROR MESSAGE FROM pdb2pqr:\n"+str(grepexc.output)+"\n-----------"
                     else:
                         err.put_value(2)
-                        err.info+= "\nCannot correct file"+n+"Unexpected exception.\n" +str(grepexc.output)+ "\nSkipping "   
+                        err.info+= "\nCannot correct file"+n+"Unexpected exception.\n Skipping "   
                         return err,comment
             except Exception:
                 print("IMPORTANT WARNING: Unexpected exception. Skipping")
                 err.put_value(2)
-                err.info = "Unexpected exception on "+n+ "\n ORIGINAL ERROR MESSAGE FROM pdb2pqr:\n"+str(grepexc.output)+"\n-----------"
+                err.info = "Unexpected exception on "+n+ "\n ORIGINAL ERROR MESSAGE FROM pdb2pqr:\n"+str(subprocess.CalledProcessError)+"\n-----------"
                 return err,comment
     if(skipLarge):
         lenght = file_len(outname)
@@ -667,11 +699,22 @@ def main(argv):
 
     ###
     try:
-        opts, args = getopt.getopt(argv,"dc",["XYZ","excludeLarge","PQR","purgePDB","safe","quiet"])
+        opts, args = getopt.getopt(argv,"dch",["XYZ","excludeLarge","PQR","purgePDB","safe","quiet","help"])
     except getopt.GetoptError:
         print ('uncorrect formatting of options')
         sys.exit(2)
     for opt, arg in opts:
+        if opt in["-h","--help"]:
+            print("Usage:\npython3 lfetch\nOptions:")
+            print("--XYZ: ligands extracted as coordinate files")
+            print("--PQR: pdb structures queried are converted to PQR. CAREFUL: needspdb2pqr intalled")
+            print("--purgePDB: a copy of the original pdb structure without the extracted ligand is produced")
+            print("--safe: Partial matches to MOAD naming scheme are excluded")
+            print("--quiet: No info is printed on stdout while running")
+            print("-d: \'Database mode\'--> all pdbs in the working folder are analysed")
+            print("-c: User can split the result (e.g. extracted ligands) in separate folders defining the size of each chunk")
+            input('\n')
+            sys.exit()
         if opt in ["--excludeLarge"]:
             excludeLage = True 
         if opt in ["-d"]:
@@ -731,8 +774,11 @@ def main(argv):
         buildDatabase =True
 
         #exclude files containing _ which are ligands or purged pdb
-        infileList=[n for n in glob.glob('*.pdb') if "_" not in n]
-    
+        infileList=[n for n in sorted(glob.glob('*.pdb')) if "_" not in n]
+        infileList.extend([n for n in sorted(glob.glob('*.pqr')) if "_" not in n])
+        
+        # print(infileList)
+        
         if not infileList:
             try:
                 raise FileNotFoundError("pdb files must be placed in the running folder\n")
@@ -746,7 +792,8 @@ def main(argv):
         else:
             nc = 0
         #split pdb list into chunks
-        nameList = [re.match("(.*)\.pdb",l).groups()[0] for l in infileList]
+        nameList = [re.match("(.*)\.(pdb|pqr)",l).groups()[0] for l in infileList]
+        # print(nameList)
         c_infile =[]
         for fc in chunks(nameList,nc):
             c_infile.append(fc)
@@ -774,7 +821,7 @@ def main(argv):
 
 #############  ******* CORE FUNCTIONS ******* #############################
     done = set()
-
+    patience=False
     loopinf=True
     data = [None]
     local_path =[None]
@@ -793,6 +840,7 @@ def main(argv):
             except :
                 exit("a not handled exception occurred..")
         else:
+            patience=True
             loopinf =False
             moveFile = True
             data = [l for l in c_infile]
@@ -840,7 +888,7 @@ def main(argv):
                 global_counter+=1
                 
                 # print('\n**'+n)
-                err,ligandList = queryMOAD(n)
+                err,ligandList = queryMOAD(n,patience)
                 # print(ligandList)
                 err.handle(errFile)
                 if(err.value==2):
@@ -858,6 +906,7 @@ def main(argv):
                             stop+=1
                             print("<ERROR>: Could not extract ligands for "+n+", trying to re-download structure..")
                             err.info="Trying to re-download structure.."
+                            err.value=1
                             err.handle(errFile)
                             url = "https://files.rcsb.org/download/"+n+".pdb"
                             print(url)
@@ -872,6 +921,7 @@ def main(argv):
                             # if proc.returncode != 0:
                                 # print(stderr)
                                 print("Could not download "+n)
+                                err.value =2
                                 err.handle(errFile)
                                 err.info = "Could not (re)download "+n
                                 err.handle(errFile)
@@ -906,7 +956,7 @@ def main(argv):
                 comment = comment1+comment2
                 # Updating ligMap
                 if(err.value==3):
-                    if(verbose):
+                    if(verbose and (not isDatabase)):
                         print("SKIPPING "+n+" since too large \n")
                     ligMapFiles[s].write('\n# '+str(len(ligandList)) +"\t" + n + "\t <-- Too large! IGNORING")
                     for l in ligandList:
@@ -926,16 +976,16 @@ def main(argv):
                     logfile.write("\n"+n)
                     for k,d in enumerate(ligandList):
                         if(matched[k]==1):
-                            ligMapFiles[s].write("\n" + d['filename'])
+                            ligMapFiles[s].write("\n" + d['filename']+"\t "+ str(d['isPeptide']))
                         elif(matched[k]==-1):
                             if(noTollerance):
                                 lfile=local_path[s]+'/'+d['filename']+extension
                                 subprocess.run(['rm',lfile])
-                                ligMapFiles[s].write("\n#" + d['filename']+"\t# <-- Partial match with respect to what expected. SAFE MODE=skipping")
+                                ligMapFiles[s].write("\n#" + d['filename']+"\t "+ str(d['isPeptide']) +"\t# <-- Partial match with respect to what expected. SAFE MODE=skipping")
                             else:
-                                ligMapFiles[s].write("\n" + d['filename']+"\t# <-- Partial match with respect to what expected..")
+                                ligMapFiles[s].write("\n" + d['filename']+"\t "+ str(d['isPeptide']) +"\t# <-- Partial match with respect to what expected..")
                         else:
-                            ligMapFiles[s].write("\n#" + d['filename']+" <-- NOT found in pdb") 
+                            ligMapFiles[s].write("\n#" + d['filename']+"\t"+ str(d['isPeptide']) +"<-- NOT found in pdb") 
                             
 
                 
@@ -944,8 +994,8 @@ def main(argv):
                 done.add(n.lower())
                 if verbose:
                     if(isDatabase):
-                        print("processed: " +n)
-                        print("%d / %d of structures processed" % (global_counter,total))
+                        # print("processed: " +n)
+                        print("\r%d / %d of structures processed" % (global_counter,total),end='')
                     else:
                         print("Valid ligands found: ",len(ligandList))
                         if(noTollerance):
