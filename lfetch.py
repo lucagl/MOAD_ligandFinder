@@ -839,7 +839,7 @@ def main(argv):
                     local_path.append(here+'/'+local_folder)
                     ligMapFiles.append(open(local_path[-1]+"/ligandMap.txt",'w'))
                     ligMapFiles[-1].write("# ************** PDB ligand Map *************** \n")
-                    ligMapFiles[-1].write("#\tCreated using '*BuildMap module*\n# Ligand validation based on binding MOAD database.\n")
+                    ligMapFiles[0].write("#\tCreated using '*lfetch-MOAD_ligandFinder*\n# Ligand validation is based on binding MOAD database.\n")
                     ligMapFiles[-1].write("# Author L. Gagliardi, Istituto Italiano di Tecnologia\n")
                     ligMapFiles[-1].write("# "+stopWatch.init())
                     ligMapFiles[-1].write('\n# --------------\n')
