@@ -93,4 +93,7 @@ Example of ligand.txt produced from the above call:
 
 # ACKNOLEDGMENTS:
 This is a small accessory project in my work, but still I would very much appreciate an acknowledgment if this helped you save some time :). 
-*Luca Gagliardi, MOAD ligandFinder, (2021) GitHub repository*.
+*Luca Gagliardi, MOAD ligandFinder, (2021) GitHub repository* and or:
+
+## Cite
+(*) L. Gagliardi et al, SHREC 2022: Protein-ligand binding site recognition, *Computers & Graphics* https://doi.org/10.1016/j.cag.2022.07.005 (2022)
